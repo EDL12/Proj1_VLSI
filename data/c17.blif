@@ -1,0 +1,27 @@
+.model C17.iscas
+.inputs 1GAT(0) 2GAT(1) 3GAT(2) 6GAT(3) 7GAT(4)
+.outputs 22GAT(10) 23GAT(9)
+.default_input_arrival 0.00 0.00 
+.default_output_required 0.00 0.00 
+.default_input_drive 0.30 0.30 
+.default_output_load 1.00 
+.default_max_input_load 999.00 
+.names 1GAT(0) 3GAT(2) [81]
+0- 1
+-0 1
+.names 3GAT(2) 6GAT(3) [78]
+0- 1
+-0 1
+.names [78] 2GAT(1) [85]
+0- 1
+-0 1
+.names [81] [85] 22GAT(10)
+0- 1
+-0 1
+.names [78] 7GAT(4) [83]
+0- 1
+-0 1
+.names [83] [85] 23GAT(9)
+0- 1
+-0 1
+.end

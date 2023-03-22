@@ -1,0 +1,123 @@
+0000000000 -> 1111111
+1111111111 -> 0011011
+2222222222 -> 2222222
+0110101012 -> 2221022
+0121211211 -> 0011011
+1222111210 -> 0221022
+0101011010 -> 0011011
+0120120110 -> 1111000
+0110101011 -> 1111011
+1001101011 -> 1111011
+1010110101 -> 1111010
+0100010110 -> 1111000
+1111010101 -> 1111010
+1101011010 -> 0011011
+0100101101 -> 0001010
+0111011011 -> 0011011
+1001010110 -> 1111000
+0010101101 -> 1001010
+1100110001 -> 1111011
+1010111011 -> 0011011
+0110101011 -> 1111011
+0000111111 -> 0011011
+1111100000 -> 1111111
+1010101010 -> 0011011
+1011010101 -> 1111010
+0000011111 -> 0011011
+
+List of Undetected Faults:
+Gate n (PO)  - input0 (n), S_A_1
+Gate p (NAND)- input0 ([122]), S_A_1
+Gate [122] (NOR) - output, S_A_1
+Gate [122] (NOR) - input1 ([63]), S_A_0
+Gate [122] (NOR) - input0 ([62]), S_A_0
+Gate [100] (AND) - input0 ([337]), S_A_1
+Gate n (NAND)- output, S_A_1
+Gate [63] (AND) - output, S_A_0
+Gate [63] (AND) - input1 (h), S_A_1
+Gate [169] (NOR) - output, S_A_0
+Gate [169] (NOR) - input1 ([226]), S_A_0
+Gate [162] (AND) - input1 ([161]), S_A_1
+Gate [360] (NAND)- output, S_A_0
+Gate [360] (NAND)- input1 ([378]), S_A_1
+Gate [360] (NAND)- input0 ([376]), S_A_1
+Gate [62] (NOR) - output, S_A_0
+Gate [364] (NAND)- input1 (h), S_A_1
+Gate [193] (AND) - input1 ([341]), S_A_1
+Gate [193] (AND) - input0 ([337]), S_A_1
+Gate [226] (NAND)- output, S_A_1
+Gate [226] (NAND)- output, S_A_0
+Gate [226] (NAND)- input1 ([337]), S_A_1
+Gate [226] (NAND)- input0 ([332]), S_A_1
+Gate [176] (NOR) - output, S_A_0
+Gate [161] (AND) - output, S_A_1
+Gate [161] (AND) - input1 ([341]), S_A_1
+Gate [161] (AND) - input0 ([332]), S_A_1
+Gate [376] (NAND)- output, S_A_1
+Gate [52] (AND) - output, S_A_1
+Gate [52] (AND) - input1 (j), S_A_1
+Gate [52] (AND) - input0 ([374]), S_A_1
+Gate [95] (AND) - input0 ([332]), S_A_1
+Gate [362] (NAND)- input0 ([366]), S_A_1
+Gate [197] (AND) - input1 ([384]), S_A_1
+Gate [225] (NAND)- output, S_A_1
+Gate [225] (NAND)- input1 ([350]), S_A_1
+Gate [221] (OR)  - output, S_A_1
+Gate [221] (OR)  - input1 ([70]), S_A_0
+Gate [378] (OR)  - output, S_A_1
+Gate [378] (OR)  - input1 ([239]), S_A_0
+Gate [144] (AND) - output, S_A_0
+Gate [374] (NAND)- output, S_A_1
+Gate [374] (NAND)- input0 ([154]), S_A_1
+Gate [366] (NAND)- output, S_A_1
+Gate [366] (NAND)- input0 ([116]), S_A_1
+Gate [337] (NAND)- output, S_A_1
+Gate [337] (NAND)- input0 (j), S_A_1
+Gate [384] (OR)  - output, S_A_1
+Gate [382] (NAND)- input0 (h), S_A_1
+Gate [223] (OR)  - output, S_A_1
+Gate [70] (NOR) - output, S_A_1
+Gate [70] (NOR) - output, S_A_0
+Gate [70] (NOR) - input1 (j), S_A_0
+Gate [70] (NOR) - input0 (h), S_A_0
+Gate [350] (OR)  - input1 (j), S_A_0
+Gate [341] (OR)  - input1 (i), S_A_0
+Gate [239] (NAND)- output, S_A_1
+Gate [239] (NAND)- output, S_A_0
+Gate [239] (NAND)- input1 (e), S_A_1
+Gate [239] (NAND)- input0 (d), S_A_1
+Gate [139] (AND) - output, S_A_0
+Gate [139] (AND) - input1 (j), S_A_1
+Gate [143] (NOR) - output, S_A_0
+Gate [143] (NOR) - input1 (b), S_A_0
+Gate [143] (NOR) - input0 (a), S_A_0
+Gate [151] (NOR) - output, S_A_0
+Gate [151] (NOR) - input1 (h), S_A_0
+Gate [151] (NOR) - input0 (c), S_A_0
+Gate [154] (NOR) - output, S_A_1
+Gate [154] (NOR) - output, S_A_0
+Gate [154] (NOR) - input1 (b), S_A_0
+Gate [154] (NOR) - input0 (a), S_A_0
+Gate [220] (OR)  - input0 (h), S_A_0
+Gate [107] (AND) - input1 (j), S_A_1
+Gate [110] (NOR) - input1 (b), S_A_0
+Gate [110] (NOR) - input0 (a), S_A_0
+Gate [113] (NOR) - output, S_A_0
+Gate [113] (NOR) - input1 (j), S_A_0
+Gate [113] (NOR) - input0 (i), S_A_0
+Gate [116] (AND) - output, S_A_1
+Gate [116] (AND) - output, S_A_0
+Gate [116] (AND) - input1 (e), S_A_1
+Gate [116] (AND) - input0 (d), S_A_1
+Gate [125] (AND) - input0 (i), S_A_1
+Gate [128] (NOR) - input1 (h), S_A_0
+Gate [202] (NOR) - output, S_A_0
+Gate e (PI)  - output, S_A_1
+Gate e (PI)  - output, S_A_0
+Gate d (PI)  - output, S_A_1
+Gate d (PI)  - output, S_A_0
+
+Total Number of Faults = 272
+Number of Undetected Faults = 90
+Fault Coverage = 66.9%
+

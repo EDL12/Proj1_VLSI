@@ -1,0 +1,157 @@
+.model x2
+.inputs a b c d e f g h i j
+.outputs k l m n o p q
+.default_input_arrival 0.00 0.00 
+.default_output_required 0.00 0.00 
+.default_input_drive 0.30 0.30 
+.default_output_load 1.00 
+.default_max_input_load 999.00 
+.names i j [345]
+0- 1
+-0 1
+.names h j [350]
+1- 1
+-1 1
+.names i j [384]
+1- 1
+-1 1
+.names [350] [384] [197]
+11 1
+.names [345] [197] [198]
+11 1
+.names h i [202]
+00 1
+.names j [202] [337]
+0- 1
+-0 1
+.names h i [341]
+1- 1
+-1 1
+.names [337] [341] [193]
+11 1
+.names [198] [193] k
+0- 1
+-0 1
+.names h j [382]
+0- 1
+-0 1
+.names [350] [382] [188]
+11 1
+.names [341] [345] [185]
+11 1
+.names [188] [185] l
+0- 1
+-0 1
+.names h i [220]
+1- 1
+-1 1
+.names j [220] [332]
+1- 1
+-1 1
+.names [332] m
+0 1
+.names h j [70]
+00 1
+.names b [70] [221]
+1- 1
+-1 1
+.names a c [223]
+1- 1
+-1 1
+.names [221] [223] [176]
+00 1
+.names [345] [350] [225]
+0- 1
+-0 1
+.names [332] [337] [226]
+0- 1
+-0 1
+.names [225] [226] [169]
+00 1
+.names [176] [169] n
+0- 1
+-0 1
+.names [332] [341] [161]
+11 1
+.names [345] [161] [162]
+11 1
+.names [350] g [157]
+11 1
+.names [162] [157] o
+0- 1
+-0 1
+.names a b [154]
+00 1
+.names c h [151]
+00 1
+.names [154] [151] [374]
+0- 1
+-0 1
+.names [374] j [52]
+11 1
+.names i [52] [62]
+00 1
+.names a b [143]
+00 1
+.names c [143] [144]
+11 1
+.names i j [139]
+11 1
+.names [144] [139] [376]
+0- 1
+-0 1
+.names d e [239]
+0- 1
+-0 1
+.names j [239] [378]
+1- 1
+-1 1
+.names [376] [378] [360]
+0- 1
+-0 1
+.names [360] h [63]
+11 1
+.names [62] [63] [122]
+00 1
+.names f h [128]
+00 1
+.names i j [125]
+11 1
+.names [128] [125] [355]
+0- 1
+-0 1
+.names [355] g [119]
+11 1
+.names [122] [119] p
+0- 1
+-0 1
+.names d e [116]
+11 1
+.names i j [113]
+00 1
+.names [116] [113] [366]
+0- 1
+-0 1
+.names a b [110]
+00 1
+.names c j [107]
+11 1
+.names [110] [107] [368]
+0- 1
+-0 1
+.names [366] [368] [362]
+0- 1
+-0 1
+.names [362] h [364]
+0- 1
+-0 1
+.names [355] [364] [99]
+11 1
+.names [337] [99] [100]
+11 1
+.names [332] g [95]
+11 1
+.names [100] [95] q
+0- 1
+-0 1
+.end

@@ -1,0 +1,8 @@
+./3fsim s5378.blif s5378.pat s5378.out
+diff s5378.out s5378.gold.out
+./3fsim s9234.blif s9234.pat s9234.out
+diff s9234.out s9234.gold.out
+./3fsim s13207.blif s13207.pat s13207.out
+diff s13207.out s13207.gold.out
+./3fsim s38417.blif s38417.pat s38417.out
+diff s38417.out s38417.gold.out

@@ -1,0 +1,17 @@
+00 -> 1
+01 -> 1
+10 -> 1
+11 -> 0
+02 -> 1
+12 -> 2
+20 -> 1
+21 -> 2
+22 -> 2
+
+List of Undetected Faults:
+(Empty)
+
+Total Number of Faults = 10
+Number of Undetected Faults = 0
+Fault Coverage = 100.0%
+

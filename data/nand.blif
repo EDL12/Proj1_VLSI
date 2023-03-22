@@ -1,0 +1,7 @@
+.model nand
+.inputs a b
+.outputs c
+.names a b c 
+0- 1
+-0 1
+.end

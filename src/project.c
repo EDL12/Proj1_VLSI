@@ -150,13 +150,17 @@ pattern_t *pat;
 fault_list_t *undetected_flist;
 {
   int p; /* looping variable for pattern number */
-  int i;
+  int i; /* looping variable for gates */
+  int j; /* looping variable for fanout additions/subtractions */
+  int k; /* looping variable for fanout head of list*/
+  int sum; /* total fanouts in fanout list thus far*/
   fault_list_t *fptr, *prev_fptr;
   int detected_flag;
   int undetectable_flag;                     // fault dissipates within gate; checks with fault-free
   int fault_fanout;                          // number of gates that take fault output as input
-  char ckt_inputs[pat->len][ckt->ngates][2]; //
-  char ckt_outputs[pat->len][ckt->ngates];
+  char ckt_inputs[pat->len][ckt->ngates][2]; // copy of all inputs from fault-free circuit
+  char ckt_outputs[pat->len][ckt->ngates];   // copy of all outputs from fault-free circuit
+  char fanout_list[2*(ckt->ngates)];         //list of fanouts that need to be checked
 
   /*************************/
   /* fault-free simulation */
@@ -354,6 +358,7 @@ fault_list_t *undetected_flist;
             a primary output, fault needs to be propagated */
             else
             {
+              for(j = 0; j < ckt->gate[i].num_fanout; j++) fanout_list[j] = 
               fault_fanout = ckt->gate[i].num_fanout;
               i = ckt->gate[i].fanout[0];
             }

@@ -103,6 +103,34 @@
     }                                                            \
   }
 
+#define erase_inputs(circuit, num)              \
+  {                                             \
+    switch (circuit->gate[num].type)            \
+    {                                           \
+    /* gates with no input terminal */          \
+    case PI:                                    \
+    case PO_GND:                                \
+    case PO_VCC:                                \
+      break;                                    \
+    /* gates with one input terminal */         \
+    case INV:                                   \
+    case BUF:                                   \
+    case PO:                                    \
+      circuit->gate[num].in_val[0] = UNDEFINED; \
+      break;                                    \
+    /* gates with two input terminals */        \
+    case AND:                                   \
+    case NAND:                                  \
+    case OR:                                    \
+    case NOR:                                   \
+      circuit->gate[num].in_val[0] = UNDEFINED; \
+      circuit->gate[num].in_val[1] = UNDEFINED; \
+      break;                                    \
+    default:                                    \
+      assert(0);                                \
+    }                                           \
+  }
+
 /*************************************************************************
 
 Function:  three_val_fault_simulate
@@ -125,8 +153,8 @@ fault_list_t *undetected_flist;
   int i;
   fault_list_t *fptr, *prev_fptr;
   int detected_flag;
-  int undetectable_flag; //fault dissipates within gate; checks with fault-free
-  int fault_fanout; //number of gates that take fault output as input
+  int undetectable_flag;                     // fault dissipates within gate; checks with fault-free
+  int fault_fanout;                          // number of gates that take fault output as input
   char ckt_inputs[pat->len][ckt->ngates][2]; //
   char ckt_outputs[pat->len][ckt->ngates];
 
@@ -196,33 +224,31 @@ fault_list_t *undetected_flist;
   /* fault simulation */
   /********************/
 
+  /* initialize all gate values to UNDEFINED */
+  for (i = 0; i < ckt->ngates; i++)
+  {
+    ckt->gate[i].in_val[0] = UNDEFINED;
+    ckt->gate[i].in_val[1] = UNDEFINED;
+    ckt->gate[i].out_val = UNDEFINED;
+    ckt->gate[i].fault_prone = FALSE;
+    ckt->gate[i].fault_prone_num = 0;
+  }
+
   /* loop through all undetected faults */
   prev_fptr = (fault_list_t *)NULL;
   for (fptr = undetected_flist; fptr != (fault_list_t *)NULL; fptr = fptr->next)
   {
     /* loop through all patterns */
     detected_flag = FALSE;
-    for (p = 0; (p < pat->len) && !detected_flag; p++)
+    for (p = 0; (p < pat->len); p++)
     {
       undetectable_flag = FALSE;
-      fault_fanout = 0;
-      /* initialize all gate values to UNDEFINED */
-      for (i = 0; i < ckt->ngates; i++)
-      {
-        ckt->gate[i].in_val[0] = UNDEFINED;
-        ckt->gate[i].in_val[1] = UNDEFINED;
-        ckt->gate[i].out_val = UNDEFINED;
-        ckt->gate[i].fault_prone = FALSE;
-        ckt->gate[i].fault_prone_num = 0;
-      }
-      /* assign primary input values for pattern */
-      //for (i = 0; i < ckt->npi; i++)
-      //{
-      //  ckt->gate[ckt->pi[i]].out_val = pat->in[p][i];
-      //}
+      fault_fanout = 1;
+      i = fptr->gate_index;
       /* evaluate all gates */
-      for (i = fptr->gate_index; i < ckt->ngates; i++)
+      while (fault_fanout != 0)
       {
+        /* get the input values for the gate to fault-free or fan-in */
         int input0;
         int input1;
         if (ckt->gate[ckt->gate[i].fanin[0]].out_val == UNDEFINED)
@@ -233,7 +259,8 @@ fault_list_t *undetected_flist;
           input1 = ckt_inputs[p][i][1];
         else
           input1 = ckt->gate[ckt->gate[i].fanin[1]].out_val;
-        /* get gate input values */
+
+        /* set gate input values, fault-prone gate, and fault-prone inputs */
         switch (ckt->gate[i].type)
         {
           /* gates with no input terminal */
@@ -273,56 +300,103 @@ fault_list_t *undetected_flist;
         default:
           assert(0);
         }
+
         /* check if faulty gate */
         if (i == fptr->gate_index)
         {
           /* check if fault at input */
           if (fptr->input_index >= 0)
           {
-            /* inject fault */
-            if ((fptr->type == S_A_0) && (ckt->gate[i].in_val[fptr->input_index] != LOGIC_0))
+            /* set fault as input if different from fault-free input */
+            /* S_A_0 */
+            if ((fptr->type == S_A_0) && (ckt_inputs[p][i][fptr->input_index] != LOGIC_0))
             {
               ckt->gate[i].in_val[fptr->input_index] = LOGIC_0;
               ckt->gate[i].fault_prone = TRUE;
             }
-            else if ((fptr->type == S_A_1) && (ckt->gate[i].in_val[fptr->input_index] != LOGIC_1))
-            { /* S_A_1 */
+            /* S_A_1 */
+            else if ((fptr->type == S_A_1) && (ckt_inputs[p][i][fptr->input_index] != LOGIC_1))
+            {
               ckt->gate[i].in_val[fptr->input_index] = LOGIC_1;
               ckt->gate[i].fault_prone = TRUE;
             }
+            /* if the fault input is the same as the fault-free input, fault cannot be detected */
             else
             {
+              erase_inputs(ckt, i);
               undetectable_flag = TRUE;
               break;
             }
             /* compute gate output value */
             evaluate(ckt->gate[i]);
+            /* if the computed value is the same as fault-free, fault cannot be detected */
             if ((ckt->gate[i].out_val == ckt_outputs[p][i]) && (ckt->gate[i].fault_prone == TRUE))
             {
+              ckt->gate[i].out_val = UNDEFINED;
               undetectable_flag = TRUE;
               break;
             }
+            /* if the computed value is a primary output, and that primary output is different
+            than the fault-free primary output, the fault can be detected */
+            else if ((ckt->gate[ckt->po[i]].out_val == LOGIC_0) && (pat->out[p][i] == LOGIC_1))
+            {
+              ckt->gate[i].out_val = UNDEFINED;
+              detected_flag = TRUE;
+              break;
+            }
+            else if ((ckt->gate[ckt->po[i]].out_val == LOGIC_1) && (pat->out[p][i] == LOGIC_0))
+            {
+              ckt->gate[i].out_val = UNDEFINED;
+              detected_flag = TRUE;
+              break;
+            }
+            /* if the computed value is not the same and not 
+            a primary output, fault needs to be propagated */
             else
+            {
               fault_fanout = ckt->gate[i].num_fanout;
+              i = ckt->gate[i].fanout[0];
+            }
           }
+          /* fault at output */
           else
-          { /* fault at output */
+          {
             evaluate(ckt->gate[i]);
-            /* inject fault */
-            if ((fptr->type == S_A_0) && (ckt->gate[i].out_val != LOGIC_0))
+            /* set fault as output if different from fault-free output */
+            /* S_A_0 */
+            if ((fptr->type == S_A_0) && (ckt_outputs[p][i] != LOGIC_0))
             {
               ckt->gate[i].out_val = LOGIC_0;
               ckt->gate[i].fault_prone = TRUE;
               fault_fanout = ckt->gate[i].num_fanout;
+              i = ckt->gate[i].fanout[0];
             }
-            else if ((fptr->type == S_A_1) && (ckt->gate[i].out_val != LOGIC_1))
-            { /* S_A_1 */
+            /* S_A_1 */
+            else if ((fptr->type == S_A_1) && (ckt_outputs[p][i] != LOGIC_1))
+            {
               ckt->gate[i].out_val = LOGIC_1;
               ckt->gate[i].fault_prone = TRUE;
               fault_fanout = ckt->gate[i].num_fanout;
+              i = ckt->gate[i].fanout[0];
             }
+            /* if the output of the gate is a primary output, and that primary output is different
+            than the fault-free primary output, the fault can be detected */
+            else if ((ckt->gate[ckt->po[i]].out_val == LOGIC_0) && (pat->out[p][i] == LOGIC_1))
+            {
+              ckt->gate[i].out_val = UNDEFINED;
+              detected_flag = TRUE;
+              break;
+            }
+            else if ((ckt->gate[ckt->po[i]].out_val == LOGIC_1) && (pat->out[p][i] == LOGIC_0))
+            {
+              ckt->gate[i].out_val = UNDEFINED;
+              detected_flag = TRUE;
+              break;
+            }
+            /* if the fault output is the same as the fault-free output, fault cannot be detected */
             else
             {
+              ckt->gate[i].out_val = UNDEFINED;
               undetectable_flag = TRUE;
               break;
             }
@@ -354,21 +428,9 @@ fault_list_t *undetected_flist;
           }
         }
       }
-      /* check if fault detected */
-      if (undetectable_flag == TRUE)
-        continue;
-      if (undetectable_flag == FALSE)
-      {
-        for (i = 0; i < ckt->npo; i++)
-        {
-          if (ckt->gate[ckt->po[i]].out_val == UNDEFINED)
-            ckt->gate[ckt->po[i]].out_val = pat->out[p][i];
-          if ((ckt->gate[ckt->po[i]].out_val == LOGIC_0) && (pat->out[p][i] == LOGIC_1))
-            detected_flag = TRUE;
-          if ((ckt->gate[ckt->po[i]].out_val == LOGIC_1) && (pat->out[p][i] == LOGIC_0))
-            detected_flag = TRUE;
-        }
-      }
+      /* if the fault is detected, break out. Otherwise, continue with pattern inputs */
+      if (detected_flag == TRUE)
+        break;
     }
     if (detected_flag)
     {

@@ -125,9 +125,9 @@ fault_list_t *undetected_flist;
   int i;
   fault_list_t *fptr, *prev_fptr;
   int detected_flag;
-  int undetectable_flag;
-  int fault_fanout;
-  char ckt_inputs[pat->len][ckt->ngates][2];
+  int undetectable_flag; //fault dissipates within gate; checks with fault-free
+  int fault_fanout; //number of gates that take fault output as input
+  char ckt_inputs[pat->len][ckt->ngates][2]; //
   char ckt_outputs[pat->len][ckt->ngates];
 
   /*************************/

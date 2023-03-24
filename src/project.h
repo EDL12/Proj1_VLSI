@@ -79,6 +79,7 @@ struct gate_struct
   int out_val;                /* store output value of gate */
   int fault_prone;            /* fault is within input(s)/output */
   int fault_prone_num;        /* number of fan-ins with faults */
+  int duplicate;              /* true if duplicate, false otherwise */
 };
 
 typedef struct circuit_struct circuit_t;

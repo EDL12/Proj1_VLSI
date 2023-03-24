@@ -149,18 +149,18 @@ circuit_t *ckt;
 pattern_t *pat;
 fault_list_t *undetected_flist;
 {
-  int p; /* looping variable for pattern number */
-  int i; /* looping variable for gates */
-  int j; /* looping variable for fanout additions/subtractions */
-  int k; /* looping variable for fanout head of list*/
-  int sum; /* total fanouts in fanout list thus far*/
+  int p;          /* looping variable for pattern number */
+  int i;          /* looping variable for gates */
+  int j;          /* looping variable for fanout additions/subtractions */
+  int k;          /* variable for fanout head of list */
+  int l;          /* variable for fanout tail of list */
+  int fanout_sum; /* total fanouts in fanout list thus far (l-k+1) */
   fault_list_t *fptr, *prev_fptr;
   int detected_flag;
   int undetectable_flag;                     // fault dissipates within gate; checks with fault-free
-  int fault_fanout;                          // number of gates that take fault output as input
   char ckt_inputs[pat->len][ckt->ngates][2]; // copy of all inputs from fault-free circuit
   char ckt_outputs[pat->len][ckt->ngates];   // copy of all outputs from fault-free circuit
-  char fanout_list[2*(ckt->ngates)];         //list of fanouts that need to be checked
+  char fanout_list[2 * (ckt->ngates)];       // list of fanouts that need to be checked
 
   /*************************/
   /* fault-free simulation */
@@ -236,6 +236,7 @@ fault_list_t *undetected_flist;
     ckt->gate[i].out_val = UNDEFINED;
     ckt->gate[i].fault_prone = FALSE;
     ckt->gate[i].fault_prone_num = 0;
+    ckt->gate[i].duplicate = FALSE;
   }
 
   /* loop through all undetected faults */
@@ -247,11 +248,20 @@ fault_list_t *undetected_flist;
     for (p = 0; (p < pat->len); p++)
     {
       undetectable_flag = FALSE;
-      fault_fanout = 1;
+      fanout_sum = 1;
+      k = 0;
+      l = 0;
       i = fptr->gate_index;
       /* evaluate all gates */
-      while (fault_fanout != 0)
+      while (fanout_sum != 0)
       {
+        if (ckt->gate[i].duplicate == TRUE)
+        {
+          ckt->gate[i].duplicate = FALSE;
+          k += 1;
+          i = fanout_list[k];
+          continue;
+        }
         /* get the input values for the gate to fault-free or fan-in */
         int input0;
         int input1;
@@ -294,7 +304,10 @@ fault_list_t *undetected_flist;
                                       ckt->gate[ckt->gate[i].fanin[1]].fault_prone);
           if ((ckt->gate[ckt->gate[i].fanin[0]].fault_prone &
                ckt->gate[ckt->gate[i].fanin[1]].fault_prone) == TRUE)
+          {
             ckt->gate[i].fault_prone_num = 2;
+            ckt->gate[i].duplicate = TRUE;
+          }
           else if ((ckt->gate[ckt->gate[i].fanin[0]].fault_prone ^
                     ckt->gate[ckt->gate[i].fanin[1]].fault_prone) == TRUE)
             ckt->gate[i].fault_prone_num = 1;
@@ -354,12 +367,14 @@ fault_list_t *undetected_flist;
               detected_flag = TRUE;
               break;
             }
-            /* if the computed value is not the same and not 
+            /* if the computed value is not the same and not
             a primary output, fault needs to be propagated */
             else
             {
-              for(j = 0; j < ckt->gate[i].num_fanout; j++) fanout_list[j] = 
-              fault_fanout = ckt->gate[i].num_fanout;
+              for (j = 0; j < ckt->gate[i].num_fanout; j++)
+                fanout_list[j] = ckt->gate[i].fanout[j];
+              fanout_sum = ckt->gate[i].num_fanout;
+              l = fanout_sum-1;
               i = ckt->gate[i].fanout[0];
             }
           }
@@ -373,7 +388,10 @@ fault_list_t *undetected_flist;
             {
               ckt->gate[i].out_val = LOGIC_0;
               ckt->gate[i].fault_prone = TRUE;
-              fault_fanout = ckt->gate[i].num_fanout;
+              for (j = 0; j < ckt->gate[i].num_fanout; j++)
+                fanout_list[j] = ckt->gate[i].fanout[j];
+              fanout_sum = ckt->gate[i].num_fanout;
+              l = fanout_sum-1;
               i = ckt->gate[i].fanout[0];
             }
             /* S_A_1 */
@@ -381,7 +399,10 @@ fault_list_t *undetected_flist;
             {
               ckt->gate[i].out_val = LOGIC_1;
               ckt->gate[i].fault_prone = TRUE;
-              fault_fanout = ckt->gate[i].num_fanout;
+              for (j = 0; j < ckt->gate[i].num_fanout; j++)
+                fanout_list[j] = ckt->gate[i].fanout[j];
+              fanout_sum = ckt->gate[i].num_fanout;
+              l = fanout_sum-1;
               i = ckt->gate[i].fanout[0];
             }
             /* if the output of the gate is a primary output, and that primary output is different
@@ -411,25 +432,49 @@ fault_list_t *undetected_flist;
         { /* not faulty gate */
           /* compute gate output value */
           evaluate(ckt->gate[i]);
+          /* if the fault dissipates, substract from fanout_sum by number of prone inputs */
           if ((ckt->gate[i].out_val == ckt_outputs[p][i]) && (ckt->gate[i].fault_prone == TRUE))
           {
             if (ckt->gate[i].fault_prone_num == 2)
-              fault_fanout -= 2;
+              fanout_sum -= 2;
             else
-              fault_fanout -= 1;
+              fanout_sum -= 1;
+            ckt->gate[i].fault_prone_num = 0;
             ckt->gate[i].fault_prone == FALSE;
-            if (fault_fanout == 0)
-            {
-              undetectable_flag = TRUE;
-              break;
-            }
+            erase_inputs(ckt, i);
+            ckt->gate[i].out_val = UNDEFINED;
+            k += 1;
+            i = fanout_list[k];
           }
+          /* if the output of the gate is a primary output, and that primary output is different
+            than the fault-free primary output, the fault can be detected */
+          else if ((ckt->gate[ckt->po[i]].out_val == LOGIC_0) && (pat->out[p][i] == LOGIC_1))
+          {
+            ckt->gate[i].out_val = UNDEFINED;
+            detected_flag = TRUE;
+            break;
+          }
+          else if ((ckt->gate[ckt->po[i]].out_val == LOGIC_1) && (pat->out[p][i] == LOGIC_0))
+          {
+            ckt->gate[i].out_val = UNDEFINED;
+            detected_flag = TRUE;
+            break;
+          }
+          /* if the fault doesn't dissipate, continue with propagation */
           else
           {
             if (ckt->gate[i].fault_prone_num == 2)
-              fault_fanout = (fault_fanout + ckt->gate[i].num_fanout - 2);
+              fanout_sum = (fanout_sum + ckt->gate[i].num_fanout - 2);
             else
-              fault_fanout = (fault_fanout + ckt->gate[i].num_fanout - 1);
+              fanout_sum = (fanout_sum + ckt->gate[i].num_fanout - 1);
+            for (j = 0; j < ckt->gate[i].num_fanout; j++){
+              fanout_list[j+l] = ckt->gate[i].fanout[j];
+            }
+            ckt->gate[i].fault_prone_num = 0;
+            ckt->gate[i].fault_prone == FALSE;
+            erase_inputs(ckt, i);
+            k += 1;
+            i = fanout_list[k];
           }
         }
       }

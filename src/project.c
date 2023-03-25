@@ -263,11 +263,6 @@ fault_list_t *undetected_flist;
       while (fanout_sum != 0)
       {
         printf("new gate\n");
-        if (ckt->gate[i].index == 1737)
-        {
-          printf("gate type: %d\n", ckt->gate[i].type);
-          printf("fault prone?: %d\n", ckt->gate[i].fault_prone);
-        }
 
         if (ckt->gate[i].duplicate == TRUE)
         {
@@ -348,8 +343,6 @@ fault_list_t *undetected_flist;
           else if ((ckt->gate[ckt->gate[i].fanin[0]].fault_prone ^
                     ckt->gate[ckt->gate[i].fanin[1]].fault_prone) == TRUE)
             ckt->gate[i].fault_prone_num = 1;
-          else
-            ckt->gate[i].fault_prone_num = 0;
           break;
         default:
           assert(0);
@@ -381,13 +374,11 @@ fault_list_t *undetected_flist;
             if ((fptr->type == S_A_0) && (ckt_inputs[p][i][fptr->input_index] != LOGIC_0))
             {
               ckt->gate[i].in_val[fptr->input_index] = LOGIC_0;
-              ckt->gate[i].fault_prone = TRUE;
             }
             /* S_A_1 */
             else if ((fptr->type == S_A_1) && (ckt_inputs[p][i][fptr->input_index] != LOGIC_1))
             {
               ckt->gate[i].in_val[fptr->input_index] = LOGIC_1;
-              ckt->gate[i].fault_prone = TRUE;
             }
             /* if the fault input is the same as the fault-free input, fault cannot be detected */
             else
@@ -403,7 +394,6 @@ fault_list_t *undetected_flist;
             if ((ckt->gate[i].out_val == ckt_outputs[p][i]) || (ckt_outputs[p][i] == LOGIC_X))
             {
               erase_inputs(ckt, i);
-              ckt->gate[i].fault_prone = FALSE;
               ckt->gate[i].out_val = UNDEFINED;
               break;
             }
@@ -412,7 +402,6 @@ fault_list_t *undetected_flist;
             else if ((ckt->gate[i].type == PO) && (ckt->gate[i].out_val != ckt_outputs[p][i]))
             {
               erase_inputs(ckt, i);
-              ckt->gate[i].fault_prone = FALSE;
               ckt->gate[i].out_val = UNDEFINED;
               detected_flag = TRUE;
               break;
@@ -421,6 +410,7 @@ fault_list_t *undetected_flist;
             a primary output, fault needs to be propagated */
             else
             {
+              ckt->gate[i].fault_prone = TRUE;
               erase_inputs(ckt, i);
               for (j = 0; j < ckt->gate[i].num_fanout; j++)
                 fanout_list[j] = ckt->gate[i].fanout[j];
@@ -439,7 +429,6 @@ fault_list_t *undetected_flist;
             if ((fptr->type == S_A_0) && (ckt_outputs[p][i] != LOGIC_0))
             {
               ckt->gate[i].out_val = LOGIC_0;
-              ckt->gate[i].fault_prone = TRUE;
               erase_inputs(ckt, i);
               for (j = 0; j < ckt->gate[i].num_fanout; j++)
                 fanout_list[j] = ckt->gate[i].fanout[j];
@@ -450,7 +439,6 @@ fault_list_t *undetected_flist;
             else if ((fptr->type == S_A_1) && (ckt_outputs[p][i] != LOGIC_1))
             {
               ckt->gate[i].out_val = LOGIC_1;
-              ckt->gate[i].fault_prone = TRUE;
               erase_inputs(ckt, i);
               for (j = 0; j < ckt->gate[i].num_fanout; j++)
                 fanout_list[j] = ckt->gate[i].fanout[j];
@@ -462,7 +450,6 @@ fault_list_t *undetected_flist;
             if ((ckt->gate[i].out_val == ckt_outputs[p][i]) || (ckt_outputs[p][i] == LOGIC_X))
             {
               erase_inputs(ckt, i);
-              ckt->gate[i].fault_prone = FALSE;
               ckt->gate[i].out_val = UNDEFINED;
               break;
             }
@@ -471,11 +458,11 @@ fault_list_t *undetected_flist;
             else if ((ckt->gate[i].type == PO) && (ckt->gate[i].out_val != ckt_outputs[p][i]))
             {
               erase_inputs(ckt, i);
-              ckt->gate[i].fault_prone = FALSE;
               ckt->gate[i].out_val = UNDEFINED;
               detected_flag = TRUE;
               break;
             }
+            ckt->gate[i].fault_prone = TRUE;
             i = ckt->gate[i].fanout[0];
             continue;
           }
@@ -488,7 +475,7 @@ fault_list_t *undetected_flist;
           if ((ckt->gate[i].out_val == ckt_outputs[p][i]) || (ckt_outputs[p][i] == LOGIC_X))
           {
             printf("Current gate: %d\nFault prone number: %d\n",
-            ckt->gate[i].type, ckt->gate[i].fault_prone_num);
+                   ckt->gate[i].type, ckt->gate[i].fault_prone_num);
             printf("Current fanout sum: %d\n", fanout_sum);
             if (ckt->gate[i].fault_prone_num == 2)
               fanout_sum -= 2;

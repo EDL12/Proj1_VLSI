@@ -4,7 +4,7 @@
             "name": "C/C++: gcc.exe build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
+            "program": "${fileDirname}\\3fsim.exe",
             "args": ["x2.blif", "x2.pat", "x2.out"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

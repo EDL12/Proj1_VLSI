@@ -77,9 +77,9 @@ struct gate_struct
   int *fanout;                /* array of indices of fanout gates */
   int in_val[MAX_GATE_FANIN]; /* store input values of gate */
   int out_val;                /* store output value of gate */
-  int fault_prone;            /* fault is within input(s)/output */
-  int fault_prone_num;        /* number of fan-ins with faults */
-  int duplicate;              /* true if duplicate, false otherwise */
+  char fault_prone;            /* fault is within input(s)/output */
+  char fault_prone_num;        /* number of fan-ins with faults */
+  char duplicate;              /* true if duplicate, false otherwise */
 };
 
 typedef struct circuit_struct circuit_t;

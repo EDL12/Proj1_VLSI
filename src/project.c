@@ -483,7 +483,7 @@ fault_list_t *undetected_flist;
               fanout_sum -= 1;
             erase_inputs(ckt, i);
             ckt->gate[i].fault_prone_num = 0;
-            ckt->gate[i].fault_prone == FALSE;
+            ckt->gate[i].fault_prone = FALSE;
             ckt->gate[i].out_val = UNDEFINED;
             k += 1;
             printf("Current fault gate: %d\n", ckt->gate[i].type);
@@ -495,15 +495,17 @@ fault_list_t *undetected_flist;
           than the fault-free primary output, the fault can be detected */
           else if ((ckt->gate[i].type == PO) && (ckt->gate[i].out_val != ckt_outputs[p][i]))
           {
-            /* erase previous gate characteristics */
+            /* erase all fanout gate characteristics */
+            for(j = 0; j < k + 1; j++) {
+              fanout_list[j].fault_prone_num = 0;
+              fanout_list[j].fault_prone = FALSE;
+              fanout_list[j].out_val = UNDEFINED;
+            }
+            /* erase previous gate characteristics (in case of first faulty gate) */
             ckt->gate[ckt->gate[i].fanin[0]].fault_prone_num = 0;
             ckt->gate[ckt->gate[i].fanin[0]].fault_prone = FALSE;
             ckt->gate[ckt->gate[i].fanin[0]].out_val = UNDEFINED;
-            /* erase current gate characteristics */
             erase_inputs(ckt, i);
-            ckt->gate[i].fault_prone = FALSE;
-            ckt->gate[i].fault_prone_num = 0;
-            ckt->gate[i].out_val = UNDEFINED;
             detected_flag = TRUE;
             break;
           }
@@ -523,7 +525,7 @@ fault_list_t *undetected_flist;
               printf(" %d ", ckt->gate[fanout_list[j]].type);
             printf("\n");
 
-            l += fanout_sum;
+            l += ckt->gate[i].num_fanout;
             k += 1;
             i = fanout_list[k];
             continue;

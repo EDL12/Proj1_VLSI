@@ -262,7 +262,7 @@ fault_list_t *undetected_flist;
       /* evaluate all gates */
       while (fanout_sum != 0)
       {
-        printf("new gate\n");
+        //printf("new gate\n");
 
         if (ckt->gate[i].duplicate == TRUE)
         {
@@ -288,9 +288,13 @@ fault_list_t *undetected_flist;
         case PO:
 
           if (ckt->gate[ckt->gate[i].fanin[0]].out_val == UNDEFINED)
+          {
             input0 = ckt_inputs[p][i][0];
+            //printf("Input to gate from fault free 0\n");
+          }
           else
           {
+            //printf("Input to gate from fan in 0\n");
             input0 = ckt->gate[ckt->gate[i].fanin[0]].out_val;
             if (ckt->gate[ckt->gate[i].fanin[0]].num_fanout > 0)
               if (ckt->gate[ckt->gate[i].fanin[0]].fanout[ckt->gate[ckt->gate[i].fanin[0]].num_fanout - 1] == i)
@@ -311,9 +315,13 @@ fault_list_t *undetected_flist;
         case NOR:
 
           if (ckt->gate[ckt->gate[i].fanin[0]].out_val == UNDEFINED)
+          {
             input0 = ckt_inputs[p][i][0];
+            //printf("Input to gate from fault free 0\n");
+          }
           else
           {
+            //printf("Input to gate from fan in 0\n");
             input0 = ckt->gate[ckt->gate[i].fanin[0]].out_val;
             if (ckt->gate[ckt->gate[i].fanin[0]].num_fanout > 0)
               if (ckt->gate[ckt->gate[i].fanin[0]].fanout[ckt->gate[ckt->gate[i].fanin[0]].num_fanout - 1] == i)
@@ -321,9 +329,13 @@ fault_list_t *undetected_flist;
           }
 
           if (ckt->gate[ckt->gate[i].fanin[1]].out_val == UNDEFINED)
+          {
             input1 = ckt_inputs[p][i][1];
+            //printf("Input to gate from fault free 1\n");
+          }
           else
           {
+            //printf("Input to gate from fan in 1\n");
             input1 = ckt->gate[ckt->gate[i].fanin[1]].out_val;
             if (ckt->gate[ckt->gate[i].fanin[1]].num_fanout > 0)
               if (ckt->gate[ckt->gate[i].fanin[1]].fanout[ckt->gate[ckt->gate[i].fanin[1]].num_fanout - 1] == i)
@@ -424,6 +436,9 @@ fault_list_t *undetected_flist;
           else
           {
             evaluate(ckt->gate[i]);
+            if(ckt->gate[i].type == PI) ckt->gate[i].out_val = ckt_outputs[p][i];
+            //printf("Faulty gate in value 0: %d\n", ckt->gate[i].in_val[0]);
+            //printf("Faulty gate in value 1: %d\n", ckt->gate[i].in_val[1]);
             /* set fault as output if different from fault-free output */
             /* S_A_0 */
             if ((fptr->type == S_A_0) && (ckt_outputs[p][i] != LOGIC_0))
@@ -434,6 +449,7 @@ fault_list_t *undetected_flist;
                 fanout_list[j] = ckt->gate[i].fanout[j];
               fanout_sum = ckt->gate[i].num_fanout;
               l = fanout_sum - 1;
+              //printf("here0");
             }
             /* S_A_1 */
             else if ((fptr->type == S_A_1) && (ckt_outputs[p][i] != LOGIC_1))
@@ -444,7 +460,10 @@ fault_list_t *undetected_flist;
                 fanout_list[j] = ckt->gate[i].fanout[j];
               fanout_sum = ckt->gate[i].num_fanout;
               l = fanout_sum - 1;
+              //printf("here1");
             }
+            //printf("Faulty gate out value: %d\n", ckt->gate[i].out_val);
+            //printf("Fault free out value: %d\n", ckt_outputs[p][i]);
             /* if the set value is the same as fault-free or output
             is a don't care, fault cannot be detected/doesn't matter */
             if ((ckt->gate[i].out_val == ckt_outputs[p][i]) || (ckt_outputs[p][i] == LOGIC_X))
@@ -462,6 +481,8 @@ fault_list_t *undetected_flist;
               detected_flag = TRUE;
               break;
             }
+            //printf("Faulty gate, # of fanouts: %d\n", ckt->gate[i].num_fanout);
+            //printf("Faulty gate, current fanout sum: %d\n", fanout_sum);
             ckt->gate[i].fault_prone = TRUE;
             i = ckt->gate[i].fanout[0];
             continue;
@@ -474,9 +495,6 @@ fault_list_t *undetected_flist;
           /* if the fault dissipates in gate, subtract from fanout_sum by number of prone inputs */
           if ((ckt->gate[i].out_val == ckt_outputs[p][i]) || (ckt_outputs[p][i] == LOGIC_X))
           {
-            printf("Current gate: %d\nFault prone number: %d\n",
-                   ckt->gate[i].type, ckt->gate[i].fault_prone_num);
-            printf("Current fanout sum: %d\n", fanout_sum);
             if (ckt->gate[i].fault_prone_num == 2)
               fanout_sum -= 2;
             else
@@ -486,20 +504,20 @@ fault_list_t *undetected_flist;
             ckt->gate[i].fault_prone = FALSE;
             ckt->gate[i].out_val = UNDEFINED;
             k += 1;
-            printf("Current fault gate: %d\n", ckt->gate[i].type);
             i = fanout_list[k];
-            printf("Next gate: %d\n", ckt->gate[i].type);
             continue;
           }
           /* if the output of the gate is a primary output, and that primary output is different
           than the fault-free primary output, the fault can be detected */
           else if ((ckt->gate[i].type == PO) && (ckt->gate[i].out_val != ckt_outputs[p][i]))
           {
-            /* erase all fanout gate characteristics */
-            for(j = 0; j < k + 1; j++) {
+            /* erase all fanout gate characteristics up to current gate */
+            for (j = 0; j < k + 1; j++)
+            {
               ckt->gate[fanout_list[j]].fault_prone_num = 0;
               ckt->gate[fanout_list[j]].fault_prone = FALSE;
               ckt->gate[fanout_list[j]].out_val = UNDEFINED;
+              ckt->gate[i].duplicate = FALSE;
             }
             /* erase previous gate characteristics (in case of first faulty gate) */
             ckt->gate[ckt->gate[i].fanin[0]].fault_prone_num = 0;
@@ -520,10 +538,10 @@ fault_list_t *undetected_flist;
             for (j = 0; j < ckt->gate[i].num_fanout; j++)
               fanout_list[j + l + 1] = ckt->gate[i].fanout[j];
 
-            printf("Current fanout list: ");
-            for (j = 0; j < l + 1; j++)
-              printf(" %d ", ckt->gate[fanout_list[j]].type);
-            printf("\n");
+            //printf("Current fanout list: ");
+            //for (j = 0; j < l + 1; j++)
+            //  printf(" %d ", ckt->gate[fanout_list[j]].type);
+            //printf("\n");
 
             l += ckt->gate[i].num_fanout;
             k += 1;
@@ -532,7 +550,7 @@ fault_list_t *undetected_flist;
           }
         }
       }
-      printf("**next pattern\n");
+      //printf("**next pattern\n");
       /* if the fault is detected, break out. Otherwise, continue with pattern inputs */
       if (detected_flag == TRUE)
         break;

@@ -497,9 +497,9 @@ fault_list_t *undetected_flist;
           {
             /* erase all fanout gate characteristics */
             for(j = 0; j < k + 1; j++) {
-              fanout_list[j].fault_prone_num = 0;
-              fanout_list[j].fault_prone = FALSE;
-              fanout_list[j].out_val = UNDEFINED;
+              ckt->gate[fanout_list[j]].fault_prone_num = 0;
+              ckt->gate[fanout_list[j]].fault_prone = FALSE;
+              ckt->gate[fanout_list[j]].out_val = UNDEFINED;
             }
             /* erase previous gate characteristics (in case of first faulty gate) */
             ckt->gate[ckt->gate[i].fanin[0]].fault_prone_num = 0;

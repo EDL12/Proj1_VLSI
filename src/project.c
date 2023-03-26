@@ -162,7 +162,6 @@ fault_list_t *undetected_flist;
   int detected_flag;
   char ckt_inputs[pat->len][ckt->ngates][2]; // copy of all inputs from fault-free circuit
   char ckt_outputs[pat->len][ckt->ngates];   // copy of all outputs from fault-free circuit
-                                             // 2=dont care for char
 
   char input_0_flag; // if true, current gate is last fanout branch of fanin 1, so erase fanin properties
   char input_1_flag; // if true, current gate is last fanout branch of fanin 2, so erase fanin properties
